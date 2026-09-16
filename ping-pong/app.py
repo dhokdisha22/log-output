@@ -1,4 +1,3 @@
-@"
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 count = 0
@@ -20,4 +19,3 @@ server = HTTPServer(("0.0.0.0", 3000), Handler)
 print("Server running on port 3000", flush=True)
 
 server.serve_forever()
-"@ | Set-Content ping-pong/app.py
