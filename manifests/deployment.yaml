@@ -13,5 +13,18 @@ spec:
         app: log-output
     spec:
       containers:
-        - name: log-output
-          image: log-output:1.5
+        - name: log-writer
+          image: log-writer:1.10
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+
+        - name: log-reader
+          image: log-reader:1.10
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+
+      volumes:
+        - name: shared-data
+          emptyDir: {}
