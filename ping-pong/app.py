@@ -11,6 +11,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/plain")
             self.end_headers()
 
+            with open("/data/count.txt", "w") as file:
+                file.write(str(count))
+
             self.wfile.write(f"pong {count}".encode())
             count += 1
 

@@ -4,15 +4,22 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             with open("/data/log.txt", "r") as file:
-                content = file.read()
+                logs = file.read()
         except FileNotFoundError:
-            content = "No logs yet"
+            logs = "No logs yet"
+
+        try:
+            with open("/data/count.txt", "r") as file:
+                count = file.read()
+        except FileNotFoundError:
+            count = "0"
 
         self.send_response(200)
         self.send_header("Content-type", "text/plain")
         self.end_headers()
 
-        self.wfile.write(content.encode())
+        response = f"Ping-pong count: {count}\n\n{logs}"
+        self.wfile.write(response.encode())
 
 server = HTTPServer(("0.0.0.0", 3000), Handler)
 
