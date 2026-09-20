@@ -14,11 +14,4 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: ping-pong:1.9
-          volumeMounts:
-            - name: shared-data
-              mountPath: /data
-      volumes:
-        - name: shared-data
-          persistentVolumeClaim:
-            claimName: shared-pvc
+          image: ping-pong:2.1
