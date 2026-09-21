@@ -18,14 +18,24 @@ spec:
           volumeMounts:
             - name: shared-data
               mountPath: /data
-
         - name: log-reader
-          image: log-reader:1.10
+          image: log-reader:2.5
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-output-config
+                  key: MESSAGE
           volumeMounts:
             - name: shared-data
               mountPath: /data
-
+            - name: config-volume
+              mountPath: /data/information.txt
+              subPath: information.txt
       volumes:
         - name: shared-data
           persistentVolumeClaim:
             claimName: shared-pvc
+        - name: config-volume
+          configMap:
+            name: log-output-config
