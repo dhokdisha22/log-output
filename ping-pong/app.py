@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import os
 
 count = 0
 
@@ -15,8 +16,8 @@ class Handler(BaseHTTPRequestHandler):
 
             count += 1
 
-server = HTTPServer(('0.0.0.0', 3000), Handler)
+server = HTTPServer(("0.0.0.0", int(os.environ["PORT"])), Handler)
 
-print('Server running on port 3000', flush=True)
+print(f"Server running on port {os.environ['PORT']}", flush=True)
 
 server.serve_forever()

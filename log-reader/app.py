@@ -16,7 +16,7 @@ class Handler(BaseHTTPRequestHandler):
             logs = "No logs yet"
         try:
             response = urllib.request.urlopen(
-                "http://ping-pong-svc:3000/pingpong"
+                os.environ.get("PINGPONG_URL")
             ).read().decode()
         except Exception:
             response = "Ping / Pongs: 0"
@@ -28,6 +28,6 @@ env variable: MESSAGE={message}
 {logs}Ping / Pongs: {response.split()[-1]}
 """
         self.wfile.write(output.encode())
-server = HTTPServer(("0.0.0.0", 3000), Handler)
-print("Reader server running on port 3000", flush=True)
+server = HTTPServer(("0.0.0.0", int(os.environ["PORT"])), Handler)
+print(f"Reader server running on port {os.environ['PORT']}", flush=True)
 server.serve_forever()

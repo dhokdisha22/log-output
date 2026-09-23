@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import os
 import json
 todos = [
     {"id": 1, "text": "Learn Kubernetes"},
@@ -31,6 +32,6 @@ class Handler(BaseHTTPRequestHandler):
             return
         self.send_response(404)
         self.end_headers()
-server = HTTPServer(("0.0.0.0", 3000), Handler)
-print("Todo backend running on port 3000", flush=True)
+server = HTTPServer(("0.0.0.0", int(os.environ["PORT"])), Handler)
+print(f"Todo backend running on port {os.environ['PORT']}", flush=True)
 server.serve_forever()

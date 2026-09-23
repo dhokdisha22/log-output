@@ -14,5 +14,8 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: todo-backend:2.2.1 
+          image: todo-backend:2.6
           imagePullPolicy: Never
+          env:
+            - name: PORT
+              value: "3000"

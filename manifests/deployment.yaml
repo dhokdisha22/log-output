@@ -19,13 +19,17 @@ spec:
             - name: shared-data
               mountPath: /data
         - name: log-reader
-          image: log-reader:2.5
+          image: log-reader:2.6
           env:
             - name: MESSAGE
               valueFrom:
                 configMapKeyRef:
                   name: log-output-config
                   key: MESSAGE
+            - name: PINGPONG_URL
+              value: "http://ping-pong-svc:3000/pingpong"
+            - name: PORT
+              value: "3000"
           volumeMounts:
             - name: shared-data
               mountPath: /data
@@ -39,3 +43,4 @@ spec:
         - name: config-volume
           configMap:
             name: log-output-config
+            
