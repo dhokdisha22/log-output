@@ -17,11 +17,26 @@ spec:
       containers:
         - name: log-writer
           image: log-writer:1.10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           volumeMounts:
             - name: shared-data
               mountPath: /data
+
         - name: log-reader
           image: log-reader:2.6
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: MESSAGE
               valueFrom:
@@ -38,6 +53,7 @@ spec:
             - name: config-volume
               mountPath: /data/information.txt
               subPath: information.txt
+
       volumes:
         - name: shared-data
           persistentVolumeClaim:
@@ -45,4 +61,3 @@ spec:
         - name: config-volume
           configMap:
             name: log-output-config
-            
