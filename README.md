@@ -68,3 +68,17 @@ Cons:
 
 DBaaS reduces maintenance work and makes backups and operations easier, but it has cloud costs. DIY PostgreSQL gives more control and is useful for learning, but requires significantly more administration and backup work.
 
+\## Exercise 3.12 — GKE Monitoring
+
+
+
+The project application logs can be viewed using Google Cloud GKE Monitoring.
+
+
+
+The application logs should be checked in the GKE workload logs, and a screenshot should be added showing the application log entry generated when a new Todo is created.
+
+
+
+GKE Monitoring requires the project to be deployed to GKE.
+
