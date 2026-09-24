@@ -1,11 +1,21 @@
-name: Build and Deploy
+name: Release application
 
 on:
   push:
 
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  REGISTRY: europe-north1-docker.pkg.dev
+  REPOSITORY: my-repository
+  BRANCH: ${{ github.ref_name }}
+
 jobs:
   build:
-    name: Build Docker Images
+    name: Build and Deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -13,7 +23,37 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Build log-writer
-        run: docker build -t log-writer:${{ github.sha }} ./log-writer
+        run: |
+          docker build -t $REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$BRANCH-$GITHUB_SHA ./log-writer
 
       - name: Build log-reader
-        run: docker build -t log-reader:${{ github.sha }} ./log-reader
+        run: |
+          docker build -t $REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$BRANCH-$GITHUB_SHA ./log-reader
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker $REGISTRY --quiet
+
+      - name: Push images
+        run: |
+          docker push $REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$BRANCH-$GITHUB_SHA
+          docker push $REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$BRANCH-$GITHUB_SHA
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Deploy
+        run: |
+          kustomize edit set image log-writer=$REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$BRANCH-$GITHUB_SHA
+          kustomize edit set image log-reader=$REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$BRANCH-$GITHUB_SHA
+          kustomize build . | kubectl apply -f -
+          kubectl rollout status deployment log-output
