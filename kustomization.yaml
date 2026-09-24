@@ -7,3 +7,11 @@ resources:
   - manifests/persistentvolumeclaim.yaml
   - manifests/deployment.yaml
   - manifests/service.yaml
+
+images:
+  - name: log-writer
+    newName: log-writer
+    newTag: latest
+  - name: log-reader
+    newName: log-reader
+    newTag: latest

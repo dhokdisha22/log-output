@@ -1,0 +1,19 @@
+name: Build and Deploy
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build log-writer
+        run: docker build -t log-writer:${{ github.sha }} ./log-writer
+
+      - name: Build log-reader
+        run: docker build -t log-reader:${{ github.sha }} ./log-reader
