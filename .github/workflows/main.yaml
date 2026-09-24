@@ -52,8 +52,17 @@ jobs:
         uses: imranismail/setup-kustomize@v3
 
       - name: Deploy
-        run: |
+        run: |-
+          NAMESPACE=${GITHUB_REF#refs/heads/}
+          if [ "$NAMESPACE" = "main" ]; then
+            NAMESPACE=project
+          fi
+
+          kubectl create namespace $NAMESPACE || true
+          kubectl config set-context --current --namespace=$NAMESPACE
+          kustomize edit set namespace $NAMESPACE
           kustomize edit set image log-writer=$REGISTRY/$PROJECT_ID/$REPOSITORY/log-writer:$BRANCH-$GITHUB_SHA
           kustomize edit set image log-reader=$REGISTRY/$PROJECT_ID/$REPOSITORY/log-reader:$BRANCH-$GITHUB_SHA
           kustomize build . | kubectl apply -f -
           kubectl rollout status deployment log-output
+          kubectl get services -o wide
