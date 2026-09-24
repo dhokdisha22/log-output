@@ -30,7 +30,7 @@ def initialize_database():
             """)
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/pingpong':
+        if self.path == '/':
             with get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute("SELECT count FROM counter WHERE id = 1")
