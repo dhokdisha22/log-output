@@ -3,6 +3,15 @@ import os
 import urllib.request
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
+        if self.path == '/healthz':
+            try:
+                urllib.request.urlopen(
+                    os.environ.get("PINGPONG_URL").replace("/pingpong", "/")                )
+                self.send_response(200)
+            except Exception:
+                self.send_response(500)
+            self.end_headers()
+            return
         try:
             with open("/data/information.txt", "r") as file:
                 file_content = file.read().strip()

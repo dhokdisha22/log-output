@@ -14,8 +14,14 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: ping-pong:3.4
+          image: ping-pong:4.1
           imagePullPolicy: Never
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
             - name: PORT
               value: "3000"

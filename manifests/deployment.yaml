@@ -29,7 +29,13 @@ spec:
               mountPath: /data
 
         - name: log-reader
-          image: log-reader:2.6
+          image: log-reader:4.1
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
             requests:
               cpu: "100m"
