@@ -1,0 +1,32 @@
+name: Build and publish application
+
+on:
+push:
+
+jobs:
+build-publish:
+name: Build, Push, Release
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Checkout
+    uses: actions/checkout@v6
+
+  - name: Build and publish
+    run: |
+      docker build --tag "dhokdisha22/log-output:$GITHUB_SHA" .
+      docker push "dhokdisha22/log-output:$GITHUB_SHA"
+
+  - name: Set up Kustomize
+    uses: imranismail/setup-kustomize@v3
+
+  - name: Use right image
+    run: kustomize edit set image PROJECT/IMAGE=dhokdisha22/log-output:$GITHUB_SHA
+
+  - name: Commit kustomization.yaml
+    uses: EndBug/add-and-commit@v10
+    with:
+      add: 'kustomization.yaml'
+      message: New version released ${{ github.sha }}
+```
