@@ -1,3 +1,4 @@
+```python
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
 import json
@@ -28,8 +29,14 @@ def initialize_database():
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS todos (
                     id SERIAL PRIMARY KEY,
-                    text TEXT NOT NULL
+                    text TEXT NOT NULL,
+                    done BOOLEAN DEFAULT FALSE
                 )
+            """)
+
+            cur.execute("""
+                ALTER TABLE todos
+                ADD COLUMN IF NOT EXISTS done BOOLEAN DEFAULT FALSE
             """)
 
             cur.execute("SELECT COUNT(*) FROM todos")
@@ -85,12 +92,16 @@ class Handler(BaseHTTPRequestHandler):
             with get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute(
-                        "SELECT id, text FROM todos ORDER BY id"
+                        "SELECT id, text, done FROM todos ORDER BY id"
                     )
                     rows = cur.fetchall()
 
             todos = [
-                {"id": row[0], "text": row[1]}
+                {
+                    "id": row[0],
+                    "text": row[1],
+                    "done": row[2]
+                }
                 for row in rows
             ]
 
@@ -114,55 +125,5 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(
-                json.dumps({"status": "broken"}).encode()
-            )
-            return
-
-        if self.path == "/todos":
-            length = int(self.headers["Content-Length"])
-            data = json.loads(self.rfile.read(length))
-
-            if len(data["text"]) > 140:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(
-                    b"Todo must be 140 characters or less"
-                )
-                return
-
-            with get_connection() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        "INSERT INTO todos (text) VALUES (%s) RETURNING id",
-                        (data["text"],)
-                    )
-                    todo_id = cur.fetchone()[0]
-
-            new_todo = {
-                "id": todo_id,
-                "text": data["text"]
-            }
-
-            self.send_response(201)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps(new_todo).encode())
-            return
-
-        self.send_response(404)
-        self.end_headers()
-
-
-initialize_database()
-
-server = HTTPServer(
-    ("0.0.0.0", int(os.environ["PORT"])),
-    Handler
-)
-
-print(
-    f"Todo backend running on port {os.environ['PORT']}",
-    flush=True
-)
-
-server.serve_forever()
+                json.dumps({"
+```
