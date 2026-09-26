@@ -1,4 +1,3 @@
-```python
 import os
 import json
 import urllib.request
@@ -6,8 +5,13 @@ import nats
 import asyncio
 
 
-NATS_URL = os.environ.get("NATS_URL", "nats://my-nats.nats.svc.cluster.local:4222")
-GENERIC_URL = os.environ["GENERIC_URL"]
+NATS_URL = os.environ.get(
+    "NATS_URL",
+    "nats://my-nats.nats.svc.cluster.local:4222"
+)
+
+GENERIC_URL = os.environ.get("GENERIC_URL", "")
+LOG_ONLY = os.environ.get("LOG_ONLY", "false").lower() == "true"
 
 
 async def main():
@@ -37,12 +41,22 @@ async def main():
             try:
                 data = json.loads(msg.data.decode())
 
+                message = data.get(
+                    "message",
+                    "A todo was updated"
+                )
+
+                if LOG_ONLY:
+                    print(
+                        f"Message received: {message}",
+                        flush=True
+                    )
+                    await msg.ack()
+                    continue
+
                 payload = json.dumps({
                     "user": "bot",
-                    "message": data.get(
-                        "message",
-                        "A todo was updated"
-                    )
+                    "message": message
                 }).encode()
 
                 request = urllib.request.Request(
@@ -64,11 +78,10 @@ async def main():
 
             except Exception as e:
                 print(
-                    f"Failed to send message: {e}",
+                    f"Failed to process message: {e}",
                     flush=True
                 )
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-```
