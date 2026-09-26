@@ -9,6 +9,8 @@ DB_USER = os.environ["POSTGRES_USER"]
 DB_PASSWORD = os.environ["POSTGRES_PASSWORD"]
 DB_PORT = os.environ["POSTGRES_PORT"]
 
+broken = False
+
 
 def get_connection():
     return psycopg.connect(
@@ -46,6 +48,39 @@ def initialize_database():
 class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
+
+        if self.path == "/healthz":
+            if broken:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(
+                    json.dumps({"status": "unhealthy"}).encode()
+                )
+                return
+
+            try:
+                with get_connection() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT 1")
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(
+                    json.dumps({"status": "ok"}).encode()
+                )
+
+            except Exception:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(
+                    json.dumps({"status": "unhealthy"}).encode()
+                )
+
+            return
+
         if self.path == "/todos":
             with get_connection() as conn:
                 with conn.cursor() as cur:
@@ -68,17 +103,26 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(404)
         self.end_headers()
 
-
     def do_POST(self):
+
+        global broken
+
+        if self.path == "/break":
+            broken = True
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(
+                json.dumps({"status": "broken"}).encode()
+            )
+            return
+
         if self.path == "/todos":
             length = int(self.headers["Content-Length"])
             data = json.loads(self.rfile.read(length))
 
             if len(data["text"]) > 140:
-                print(
-                    f"Todo rejected: {data['text']}",
-                    flush=True
-                )
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(
