@@ -1,6 +1,9 @@
-FROM python:3.12-slim
+FROM python:3.12-alpine
+
+RUN pip install --no-cache-dir kubernetes requests
+
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
-CMD ["python", "app.py"]
+
+COPY controller.py .
+
+CMD ["python", "controller.py"]
