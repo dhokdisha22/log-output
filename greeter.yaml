@@ -17,6 +17,7 @@ spec:
       containers:
         - name: greeter
           image: greeter:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: GREETING
               value: "Hello from Greeter V1"
@@ -58,6 +59,7 @@ spec:
       containers:
         - name: greeter
           image: greeter:latest
+          imagePullPolicy: IfNotPresent
           env:
             - name: GREETING
               value: "Hello from Greeter V2"
