@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wikipedia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wikipedia
+  template:
+    metadata:
+      labels:
+        app: wikipedia
+    spec:
+
+      initContainers:
+        - name: init-wikipedia
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - curl -L https://en.wikipedia.org/wiki/Kubernetes -o /www/index.html
+          volumeMounts:
+            - name: web-data
+              mountPath: /www
+
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: web-data
+              mountPath: /usr/share/nginx/html
+
+        - name: sidecar
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              while true
+              do
+                sleep $((300 + $(date +%s) % 601))
+                curl -L https://en.wikipedia.org/wiki/Special:Random -o /www/index.html
+              done
+          volumeMounts:
+            - name: web-data
+              mountPath: /www
+
+      volumes:
+        - name: web-data
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: wikipedia-svc
+spec:
+  selector:
+    app: wikipedia
+  ports:
+    - port: 80
+      targetPort: 80
