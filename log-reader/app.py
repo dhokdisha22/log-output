@@ -13,30 +13,27 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
         try:
-            with open("/data/information.txt", "r") as file:
-                file_content = file.read().strip()
-        except FileNotFoundError:
-            file_content = "File not found"
-        message = os.environ.get("MESSAGE", "")
-        try:
-            with open("/data/log.txt", "r") as file:
-                logs = file.read()
-        except FileNotFoundError:
-            logs = "No logs yet"
-        try:
-            response = urllib.request.urlopen(
-                os.environ.get("PINGPONG_URL")
-            ).read().decode()
-        except Exception:
-            response = "Ping / Pongs: 0"
-        self.send_response(200)
-        self.send_header("Content-Type", "text/plain")
-        self.end_headers()
-        output = f"""file content: {file_content}
+    response = urllib.request.urlopen(
+        os.environ.get("PINGPONG_URL")
+    ).read().decode()
+except Exception:
+    response = "Ping / Pongs: 0"
+
+try:
+    greeting = urllib.request.urlopen(
+        os.environ.get("GREETER_URL")
+    ).read().decode().strip()
+except Exception:
+    greeting = "No greeting"
+
+self.send_response(200)
+self.send_header("Content-Type", "text/plain")
+self.end_headers()
+
+output = f"""file content: {file_content}
 env variable: MESSAGE={message}
 {logs}Ping / Pongs: {response.split()[-1]}
+Greeting: {greeting}
 """
-        self.wfile.write(output.encode())
-server = HTTPServer(("0.0.0.0", int(os.environ["PORT"])), Handler)
-print(f"Reader server running on port {os.environ['PORT']}", flush=True)
-server.serve_forever()
+
+self.wfile.write(output.encode())
