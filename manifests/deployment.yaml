@@ -1,4 +1,4 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: log-output
@@ -51,7 +51,7 @@ spec:
                   name: log-output-config
                   key: MESSAGE
             - name: PINGPONG_URL
-              value: "http://ping-pong-svc:3000/pingpong"
+              value: "http://pingpong.default.svc.cluster.local/"
             - name: GREETER_URL
               value: "http://greeter-svc"
             - name: PORT

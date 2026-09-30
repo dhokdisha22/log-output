@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: pingpong
+spec:
+  template:
+    spec:
+      containers:
+        - image: kind.local/ping-pong:4.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-svc
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: example
+            - name: POSTGRES_PORT
+              value: "5432"
